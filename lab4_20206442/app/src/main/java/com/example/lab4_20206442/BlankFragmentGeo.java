@@ -179,7 +179,7 @@ public class BlankFragmentGeo extends Fragment {
         }, duration);
     }
 
-    // sensor
+    // para los sensores se utilizo ayuda de chatgpt y de lo sppt de clase
 
     @Override
     public void onResume() {

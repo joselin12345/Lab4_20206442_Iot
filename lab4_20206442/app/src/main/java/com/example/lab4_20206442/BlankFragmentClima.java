@@ -73,6 +73,9 @@ public class BlankFragmentClima extends Fragment {
 
        listaClima = climaViewModel.getClimaList().getValue();
 
+       // Log.d("mesage",  climaViewModel.getClimaList().getValue().get(0).getName());
+       // Log.d("number", String.valueOf(climaViewModel.getClimaList().getValue().size() ));
+
         climaAdapter = new ClimaAdapter(listaClima);
 
         recyclerView.setAdapter( climaAdapter);
@@ -126,6 +129,8 @@ public class BlankFragmentClima extends Fragment {
 
     }
 
+    //
+
     public void fetchProfileFromWs(String latitud,String longitud){
 
         Log.d("msg-test-ws-profile","entra al metodo " );
@@ -142,6 +147,7 @@ public class BlankFragmentClima extends Fragment {
                     if (data != null) {
 
                         climaViewModel.addClima(data);
+                      //  Log.d("number", String.valueOf(climaViewModel.getClimaList().getValue().size() ));
                     } else {
                         Log.d("msg-test-ws-profile", "No datos del clima");
                     }
