@@ -1,8 +1,15 @@
 package com.example.lab4_20206442;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
@@ -40,6 +47,10 @@ public class BlankFragmentGeo extends Fragment {
     private GeoAdapter geoAdapter;
     private GeoService geoService;
     private List<GeoData> listaGeo;
+    private SensorManager sensorManager;
+    private Sensor accelerometer;
+    private float accelerationThreshold = 15.0f; // Umbral de aceleración en m/s^2
+    private long lastShakeTime = 0;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -86,6 +97,11 @@ public class BlankFragmentGeo extends Fragment {
                 }
             }
         });
+
+        // sensor
+
+        sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
         return view;
 
@@ -163,6 +179,58 @@ public class BlankFragmentGeo extends Fragment {
         }, duration);
     }
 
+    // sensor
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        sensorManager.registerListener(accelerometerListener, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        sensorManager.unregisterListener(accelerometerListener);
+    }
+
+    private final SensorEventListener accelerometerListener = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            float x = event.values[0];
+            float y = event.values[1];
+            float z = event.values[2];
+
+            float acceleration = (float) Math.sqrt(x * x + y * y + z * z);
+
+            long currentTime = System.currentTimeMillis();
+            if (acceleration > accelerationThreshold && (currentTime - lastShakeTime) > 1000) {
+                lastShakeTime = currentTime;
+                mostrarDialogoConfirmacion();
+            }
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        }
+    };
+
+    private void mostrarDialogoConfirmacion() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage("¿Deshacer la última acción?")
+                .setPositiveButton("Sí", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
 
 
 }

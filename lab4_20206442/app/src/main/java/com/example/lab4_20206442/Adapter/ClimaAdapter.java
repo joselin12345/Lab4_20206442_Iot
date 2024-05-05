@@ -18,7 +18,7 @@ public class ClimaAdapter extends RecyclerView.Adapter<ClimaAdapter.ViewHolder>{
 
     private List<ClimaData> listaClima;
 
-    public ClimaAdapter(List<ClimaData> listalima){
+    public ClimaAdapter(List<ClimaData> listaClima){
         this.listaClima = listaClima;
     }
 
@@ -40,9 +40,9 @@ public class ClimaAdapter extends RecyclerView.Adapter<ClimaAdapter.ViewHolder>{
         } else {
             holder.ciudad.setText("Desconocido");
         }
-        holder.minimo.setText(climaData.getMain().getTemp_min());
-        holder.maximo.setText(climaData.getMain().getTemp_max());
-        holder.temperatura.setText(climaData.getMain().getTemp());
+        holder.minimo.setText("Min: " + climaData.getMain().getTemp_min() + "K");
+        holder.maximo.setText("Min: " + climaData.getMain().getTemp_max() + "K");
+        holder.temperatura.setText("Min: " + climaData.getMain().getTemp() + "K");
 
 
     }
@@ -67,5 +67,7 @@ public class ClimaAdapter extends RecyclerView.Adapter<ClimaAdapter.ViewHolder>{
 
         }
     }
+
+
 
 }

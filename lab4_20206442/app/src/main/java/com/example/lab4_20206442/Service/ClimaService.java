@@ -11,11 +11,10 @@ import retrofit2.http.Query;
 
 public interface ClimaService {
 
-
         @GET("data/2.5/weather")
-        Call<List<ClimaData>> getClima(
-                @Query("lat") double latitud,
-                @Query("lon") double longitud,
+        Call<ClimaData> getClima(
+                @Query("lat") String latitud,
+                @Query("lon") String longitud,
                 @Query("appid") String appId
         );
 

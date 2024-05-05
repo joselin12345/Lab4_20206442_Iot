@@ -2,8 +2,10 @@ package com.example.lab4_20206442;
 
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -23,6 +25,7 @@ import com.example.lab4_20206442.Data.ClimaData;
 import com.example.lab4_20206442.Data.Coord;
 import com.example.lab4_20206442.Data.GeoData;
 import com.example.lab4_20206442.Data.Main;
+import com.example.lab4_20206442.Model.ClimaModel;
 import com.example.lab4_20206442.Service.ClimaService;
 import com.example.lab4_20206442.Service.GeoService;
 
@@ -43,12 +46,19 @@ public class BlankFragmentClima extends Fragment {
     private ClimaAdapter climaAdapter;
     private ClimaService climaService;
     private List<ClimaData> listaClima;
-    private Main main;
-    private Coord coord;
 
+    private ClimaModel climaViewModel;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        climaViewModel = new ViewModelProvider(this).get(ClimaModel.class);
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+
         // fragmento
         View view = inflater.inflate(R.layout.fragment_blank_clima, container, false);
 
@@ -61,13 +71,15 @@ public class BlankFragmentClima extends Fragment {
         recyclerView = view.findViewById(R.id.recycler_view_clima);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-       listaClima = new ArrayList<>();
+       listaClima = climaViewModel.getClimaList().getValue();
 
         climaAdapter = new ClimaAdapter(listaClima);
 
-
         recyclerView.setAdapter( climaAdapter);
 
+        climaViewModel.getClimaList().observe(getViewLifecycleOwner(), newList -> {
+            climaAdapter.notifyDataSetChanged();
+        });
 
         //conexión
 
@@ -118,23 +130,21 @@ public class BlankFragmentClima extends Fragment {
 
         Log.d("msg-test-ws-profile","entra al metodo " );
 
-        Call<List<ClimaData>> call = climaService.getClima(Double.parseDouble(latitud), Double.parseDouble(longitud), "792edf06f1f5ebcaf43632b55d8b03fe");
+        Call<ClimaData> call = climaService.getClima(latitud,longitud, "792edf06f1f5ebcaf43632b55d8b03fe");
 
-        call.enqueue(new Callback<List<ClimaData>>() {
+        call.enqueue(new Callback<ClimaData>() {
             @Override
-            public void onResponse(Call<List<ClimaData>> call, Response<List<ClimaData>> response) {
+            public void onResponse(Call<ClimaData> call, Response<ClimaData> response) {
                 if (response.isSuccessful()) {
 
-                    List<ClimaData> data = response.body();
+                    ClimaData data = response.body();
 
-                    Log.d("msg-test-ws-profile",data.get(0).getName( ));
+                    if (data != null) {
 
-
-
-                        listaClima.add(new ClimaData(data.get(0).getName(), data.get(0).getMain(), data.get(0).getCoord()));
-                        climaAdapter.notifyDataSetChanged();
-                        Log.d("msg-test-ws-profile", "No es igual");
-
+                        climaViewModel.addClima(data);
+                    } else {
+                        Log.d("msg-test-ws-profile", "No datos del clima");
+                    }
 
                 } else {
                     Log.d("msg-test-ws-profile","no hay respuesta " );
@@ -142,13 +152,11 @@ public class BlankFragmentClima extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<List<ClimaData>> call, Throwable t) {
+            public void onFailure(Call<ClimaData> call, Throwable t) {
                 t.printStackTrace();
                 Log.d("msg-test-ws-profile","hay un error " );
             }
         });
-
-
 
 
     }
